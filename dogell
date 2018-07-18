@@ -6,15 +6,15 @@ require 'optparse'
 
 API_KEY = ENV['DATADOG_API_KEY']
 APP_KEY = ENV['DATADOG_APP_KEY']
-VERSION = '0.0.1'
+VERSION = '0.0.2'
 
 
 def verify_options!(options)
   error('Error: Missing user "-u my_user"') unless options[:user]
-  error('Error: Missing tag "-t some_tag:example"') unless options[:tag]
+  error('Error: Missing tag "-t some_tag:example" or hosts "-h 10.0.0.1,my_domain.intra"') unless options[:tag] || options[:hosts]
   error('Error: Missing command "-c some_command"') unless options[:command]
-  error('Error: Missing Datadog API KEY set with DATADOG_API_KEY environment variable or with  "--api-key my_key"') unless options[:api_key]
-  error('Error: Missing Datadog API KEY set with DATADOG_APP_KEY environment variable or with  "--app-key my_key"') unless options[:app_key]
+  error('Error: Missing Datadog API KEY set with DATADOG_API_KEY environment variable or with  "--api-key my_key"') unless options[:api_key] || options[:hosts]
+  error('Error: Missing Datadog API KEY set with DATADOG_APP_KEY environment variable or with  "--app-key my_key"') unless options[:app_key] || options[:hosts]
 end
 
 def error(message)
@@ -41,9 +41,14 @@ Usage: dogell -t some_tag:some_value -u ssh_user -c some_command
 
 BANNER
 
-  opts.on("-t", "--tags TAG",
+  opts.on("-t", "--tag TAG",
           "Datadog tags to search servers") do |tag|
     options[:tag] = tag
+  end
+
+  opts.on("--hosts 'some.domain,10.0.0.1'",
+          "specify the hosts to run the command(Separated by `,`)") do |hosts|
+    options[:hosts] = hosts.split(',')
   end
 
   opts.on("-c", "--command COMMAND", "Command to run in the servers") do |command|
@@ -75,7 +80,7 @@ end.parse!
 
 verify_options!(options)
 
-servers = get_servers_ips(options[:api_key], options[:app_key], options[:tag])
+servers = options[:hosts] || get_servers_ips(options[:api_key], options[:app_key], options[:tag])
 
 Net::SSH::Multi.start do |session|
   servers.each do |server|
