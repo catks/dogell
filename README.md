@@ -6,10 +6,12 @@ Dogell let's you run commands on multiple servers querying by your host tags in 
 
 ## Installation
 
-Run this command:
+To run this script you must have a ruby installed in your machine.
+
+After that, run this command:
 
 ```bash
-gem install net-ssh-multi && curl -s https://raw.githubusercontent.com/catks/dogell/master/dogell > /usr/local/bin/dogell && chmod +x /usr/local/bin/dogell
+curl -sSL https://raw.githubusercontent.com/catks/dogell/master/install.sh | bash -s stable 
 ```
 
 ## Usage
