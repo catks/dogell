@@ -1,0 +1,86 @@
+#!/usr/bin/env ruby
+require 'net/http'
+require 'json'
+require 'net/ssh/multi'
+require 'optparse'
+
+API_KEY = ENV['DATADOG_API_KEY']
+APP_KEY = ENV['DATADOG_APP_KEY']
+VERSION = '0.0.1'
+
+
+def verify_options!(options)
+  error('Missing user "-u my_user"') unless options[:user]
+  error('Missing tag "-t some_tag:example"') unless options[:tag]
+  error('Missing command "-c some_command"') unless options[:command]
+  error('Missing Datadog API KEY set with DATADOG_API_KEY environment variable or with  "--api-key my_key"') unless options[:api_key]
+  error('Missing Datadog API KEY set with DATADOG_APP_KEY environment variable or with  "--app-key my_key"') unless options[:app_key]
+end
+
+def error(message)
+  $stderr.puts message
+  exit 1
+end
+
+def get_servers_ips(api_key,app_key,tag)
+  uri = URI("https://app.datadoghq.com/reports/v2/overview?api_key=#{api_key}&application_key=#{app_key}&tags=#{tag}&with_meta=true")
+  response = Net::HTTP.get_response(uri)
+  JSON.parse(response.body)['rows'].map { |server| JSON.parse(server['meta']['gohai'])['network']['ipaddress'] }
+end
+
+options = {
+  app_key: APP_KEY,
+  api_key: API_KEY
+}
+
+OptionParser.new do |opts|
+  opts.banner = <<-BANNER
+Dogell - Run commands in multiple servers querying by your Datadog Infrastructure
+
+Usage: dogell -t some_tag:some_value -u ssh_user -c some_command
+
+BANNER
+
+  opts.on("-t", "--tags TAG",
+          "Datadog tags to search servers") do |tag|
+    options[:tag] = tag
+  end
+
+  opts.on("-c", "--command COMMAND", "Command to run in the servers") do |command|
+    options[:command] = command
+  end
+
+  opts.on("-u", "--user USER", "User to connect in the servers") do |user|
+    options[:user] = user
+  end
+
+  opts.on("-v", "--version", "User to connect in the servers") do
+    puts VERSION
+    exit
+  end
+
+  opts.on("--api-key API_KEY", "Sets the Datadog API key") do |api_key|
+    options[:api_key] = api_key
+  end
+
+  opts.on("--app-key APP_KEY", "Sets the Datadog APP key") do |app_key|
+    options[:app_key] = app_key
+  end
+
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+end.parse!
+
+verify_options!(options)
+
+servers = get_servers_ips(options[:api_key], options[:app_key], options[:tag])
+
+Net::SSH::Multi.start do |session|
+  servers.each do |server|
+    session.use(options[:user] ? "#{options[:user]}@#{server}" : server)
+  end
+
+  session.exec options[:command]
+end

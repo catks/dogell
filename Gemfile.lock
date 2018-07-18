@@ -1,0 +1,18 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    net-ssh (5.0.2)
+    net-ssh-gateway (2.0.0)
+      net-ssh (>= 4.0.0)
+    net-ssh-multi (1.2.1)
+      net-ssh (>= 2.6.5)
+      net-ssh-gateway (>= 1.2.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  net-ssh-multi
+
+BUNDLED WITH
+   1.16.2
