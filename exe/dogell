@@ -1,12 +1,11 @@
-#!/usr/bin/env ruby
 require 'net/http'
 require 'json'
 require 'net/ssh/multi'
 require 'optparse'
+require 'dogell/version'
 
 API_KEY = ENV['DATADOG_API_KEY']
 APP_KEY = ENV['DATADOG_APP_KEY']
-VERSION = '0.0.2'
 
 
 def verify_options!(options)
@@ -60,7 +59,7 @@ BANNER
   end
 
   opts.on("-v", "--version", "Shows dogell version") do
-    puts VERSION
+    puts Dogell::VERSION
     exit
   end
 

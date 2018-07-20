@@ -8,10 +8,10 @@ Dogell let's you run commands on multiple servers querying by your host tags in 
 
 To run this script you must have a ruby installed in your machine.
 
-After that, run this command:
+After that, you can install from RubyGems
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/catks/dogell/master/install.sh | bash -s stable 
+gem install dogell
 ```
 
 ## Usage
