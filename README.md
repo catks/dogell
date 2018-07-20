@@ -32,8 +32,8 @@ Dogell use Datadog host tags to query the servers with the `-t`/ `--tag` flags, 
 
 ## TODO
 
- 1. Transform this project into a gem
- 2. Separate concerns
+ 1. Separate concerns
+ 2. Add specs
 
 ## Contributing
 
