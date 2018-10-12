@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    dogell (0.0.4)
+    dogell (0.0.5)
       net-ssh-multi (~> 1.2.1)
 
 GEM
