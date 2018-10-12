@@ -81,10 +81,16 @@ verify_options!(options)
 
 servers = options[:hosts] || get_servers_ips(options[:api_key], options[:app_key], options[:tag])
 
+begin
+Thread.report_on_exception = false
 Net::SSH::Multi.start do |session|
-  servers.each do |server|
-    session.use(options[:user] ? "#{options[:user]}@#{server}" : server)
-  end
+servers.each do |server|
+session.use(options[:user] ? "#{options[:user]}@#{server}" : server)
+end
 
-  session.exec options[:command]
+session.exec options[:command]
+end
+
+rescue Net::SSH::ConnectionTimeout => e
+   error("Error: Can't connect to hosts #{servers}")
 end
