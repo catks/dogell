@@ -24,7 +24,15 @@ end
 def get_servers_ips(api_key,app_key,tag)
   uri = URI("https://app.datadoghq.com/reports/v2/overview?api_key=#{api_key}&application_key=#{app_key}&tags=#{tag}&with_meta=true")
   response = Net::HTTP.get_response(uri)
-  JSON.parse(response.body)['rows'].map { |server| JSON.parse(server['meta']['gohai'])['network']['ipaddress'] }
+  JSON.parse(response.body)['rows'].map do |server|
+    info = server['meta']['gohai']
+
+    if info
+      JSON.parse(info)['network']['ipaddress']
+    else
+      $stderr.puts "[Error] Can't get ip from #{server['host_name']}"
+    end
+  end.compact
 end
 
 options = {
